@@ -25,7 +25,7 @@ DGEAR(dataframe, con1, con2, exp1, exp2, alpha, votting_cutoff)
 A matrix containing Differentially Expressed Genes(DEGs) detected
 }
 \description{
-Main function which incorporates results from five statistical models and detects DEGs through majority voting
+Main function which incorporates results from five statistical models and detects DEGs through majority voting.
 }
 \details{
 To use this tool the necessary parameters are con1 = Control start column, con2 = Control end column, exp1 = Experiment start column, exp2 = Experiment end column, alpha = Value of significance level, voting_cutoff = Majority voting value (not more than 5, since there are 5 statistical methods which take part in the majority voting)

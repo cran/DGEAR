@@ -1,6 +1,6 @@
 #' Differential Gene Expression Analysis with R
 #'
-#' @description Main function which incorporates results from five statistical models and detects DEGs through majority voting
+#' @description Main function which incorporates results from five statistical models and detects DEGs through majority voting.
 #'
 #' @param con1 Starting column of the control of the expression data
 #' @param con2 Ending column of the control of the expression data
@@ -22,6 +22,7 @@
 #' @importFrom stats sd
 #' @importFrom stats pt
 #' @importFrom DescTools DunnettTest
+#' @importFrom stats p.adjust
 #' @examples
 #' library(DGEAR)
 #' data("gene_exp_data")
@@ -46,8 +47,9 @@ DGEAR <- function(dataframe, con1, con2, exp1, exp2, alpha, votting_cutoff){
   }
 
   t_stat = cbind.data.frame(ID=row.names(dataframe),p.value,statistic)
-  t_stat$fdr[t_stat$p.value<=(alpha/nrow(t_stat))*seq(length=nrow(t_stat))] <- 1
-
+  #t_stat$fdr[t_stat$p.value<=(alpha/nrow(t_stat))*seq(length=nrow(t_stat))] <- 1
+  t_stat$BH = p.adjust(t_stat$p.value, method = "BH")
+  t_stat$fdr[t_stat$BH<=alpha]<- 1
 
   #######____anova-oneway-test____
   p.value = NULL
@@ -62,8 +64,9 @@ DGEAR <- function(dataframe, con1, con2, exp1, exp2, alpha, votting_cutoff){
   }
   dataframe=t(dataframe)
   o_stat = cbind.data.frame(ID=row.names(dataframe),p.value,statistic)
-  o_stat$fdr[o_stat$p.value<=(alpha/nrow(o_stat))*seq(length=nrow(o_stat))] <- 1
-
+  #o_stat$fdr[o_stat$p.value<=(alpha/nrow(o_stat))*seq(length=nrow(o_stat))] <- 1
+  o_stat$BH = p.adjust(o_stat$p.value, method = "BH")
+  o_stat$fdr[o_stat$BH<=alpha]<- 1
 
   #######____Dunnett's test____
   # library(DescTools)
@@ -80,8 +83,9 @@ DGEAR <- function(dataframe, con1, con2, exp1, exp2, alpha, votting_cutoff){
   }
   dataframe=t(dataframe)
   d_stat = cbind.data.frame(ID=row.names(dataframe),p.value)
-  d_stat$fdr[d_stat$p.value<=(alpha/nrow(d_stat))*seq(length=nrow(d_stat))] <- 1
-
+  #d_stat$fdr[d_stat$p.value<=(alpha/nrow(d_stat))*seq(length=nrow(d_stat))] <- 1
+  d_stat$BH = p.adjust(d_stat$p.value, method = "BH")
+  d_stat$fdr[d_stat$BH<=alpha]<- 1
 
 
   #######____Half's t-test____
@@ -92,8 +96,9 @@ DGEAR <- function(dataframe, con1, con2, exp1, exp2, alpha, votting_cutoff){
   for (i in 1:nrow(half_t_stat)) {
     half_t_stat$p.value = 2*pt(abs(half_t_stat$statistic), df=nrow(con)-1, lower.tail = F)
   }
-  half_t_stat$fdr[half_t_stat$p.value<=(alpha/nrow(half_t_stat))*seq(length=nrow(half_t_stat))] <- 1
-
+  #half_t_stat$fdr[half_t_stat$p.value<=(alpha/nrow(half_t_stat))*seq(length=nrow(half_t_stat))] <- 1
+  half_t_stat$BH = p.adjust(half_t_stat$p.value, method = "BH")
+  half_t_stat$fdr[half_t_stat$BH<=alpha]<- 1
 
 
 
@@ -109,8 +114,9 @@ DGEAR <- function(dataframe, con1, con2, exp1, exp2, alpha, votting_cutoff){
   }
 
   u_stat = cbind.data.frame(ID=row.names(dataframe),p.value,statistic)
-  u_stat$fdr[u_stat$p.value<=(alpha/nrow(u_stat))*seq(length=nrow(u_stat))] <- 1
-
+  #u_stat$fdr[u_stat$p.value<=(alpha/nrow(u_stat))*seq(length=nrow(u_stat))] <- 1
+  u_stat$BH = p.adjust(u_stat$p.value, method = "BH")
+  u_stat$fdr[u_stat$BH<=alpha]<- 1
 
 
 

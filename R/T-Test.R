@@ -8,6 +8,8 @@
 #'
 #' @export
 #' @importFrom stats t.test
+#' @importFrom stats p.adjust
+#' @importFrom stats na.omit
 #' @examples
 #' library(DGEAR)
 #' data("gene_exp_data")
@@ -25,6 +27,14 @@ perform_t_test <- function(con, exp, alpha = 0.05) {
   }
 
   t_stat = cbind.data.frame(ID=row.names(con),p.value,statistic)
-  t_stat$fdr[t_stat$p.value<=(alpha/nrow(t_stat))*seq(length=nrow(t_stat))] <- 1
-  return(t_stat)
+  #t_stat$fdr[t_stat$p.value<=(alpha/nrow(t_stat))*seq(length=nrow(t_stat))] <- 1
+  t_stat$BH = p.adjust(t_stat$p.value, method = "BH")
+  t_stat$fdr[t_stat$BH<=alpha]<- 1
+  
+  DEGs=t_stat$ID[t_stat$fdr == 1]
+  DEGs= na.omit(DEGs)
+  DEGs = as.data.frame(DEGs)
+  colnames(DEGs) = "DEGs"
+  print(DEGs)
+  return(list(Table = t_stat, DEGs = DEGs))
 }

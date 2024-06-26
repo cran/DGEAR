@@ -9,7 +9,8 @@
 #' @export
 #'
 #' @importFrom stats wilcox.test
-#'
+#' @importFrom stats p.adjust
+#' @importFrom stats na.omit
 #' @examples
 #' library(DGEAR)
 #' data("gene_exp_data")
@@ -27,6 +28,14 @@ perform_wilcox_test <- function(con, exp, alpha = 0.05) {
   }
 
   u_stat = cbind.data.frame(ID=row.names(con),p.value,statistic)
-  u_stat$fdr[u_stat$p.value<=(alpha/nrow(u_stat))*seq(length=nrow(u_stat))] <- 1
-  return(u_stat)
+  #u_stat$fdr[u_stat$p.value<=(alpha/nrow(u_stat))*seq(length=nrow(u_stat))] <- 1
+  u_stat$BH = p.adjust(u_stat$p.value, method = "BH")
+  u_stat$fdr[u_stat$BH<=alpha]<- 1
+  
+  DEGs=u_stat$ID[u_stat$fdr == 1]
+  DEGs= na.omit(DEGs)
+  DEGs = as.data.frame(DEGs)
+  colnames(DEGs) = "DEGs"
+  print(DEGs)
+  return(list(Table = u_stat, DEGs = DEGs))
 }

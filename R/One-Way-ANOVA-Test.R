@@ -7,7 +7,8 @@
 #'
 #' @return A data frame containing values for statistic score, p-values etc for each gene being tested.
 #' @export
-#'
+#' @importFrom stats p.adjust
+#' @importFrom stats na.omit
 #' @examples
 #' library(DGEAR)
 #' data("gene_exp_data")
@@ -25,6 +26,14 @@ perform_anova <- function(datafile, con, exp, alpha =0.05) {
     statistic[i] = o$statistic
   }
   o_stat = cbind.data.frame(ID=row.names(datafile),statistic,p.value)
-  o_stat$fdr[o_stat$p.value<=(alpha/nrow(o_stat))*seq(length=nrow(o_stat))] <- 1
-  return(o_stat)
+  #o_stat$fdr[o_stat$p.value<=(alpha/nrow(o_stat))*seq(length=nrow(o_stat))] <- 1
+  o_stat$BH = p.adjust(o_stat$p.value, method = "BH")
+  o_stat$fdr[o_stat$BH<=alpha]<- 1
+  
+  DEGs=o_stat$ID[o_stat$fdr == 1]
+  DEGs= na.omit(DEGs)
+  DEGs = as.data.frame(DEGs)
+  colnames(DEGs) = "DEGs"
+  print(DEGs)
+  return(list(Table = o_stat, DEGs = DEGs))
 }

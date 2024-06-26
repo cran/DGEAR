@@ -5,13 +5,13 @@
 \alias{gene_exp_data}
 \title{A dataset containing gene expression data}
 \format{
-A data frame with 20 rows and 20 columns, where columns 1 to 10 being control and 11 to 20 being experiment.
+A data frame with 10 rows and 20 columns, the columns represents samples, say first 10 columns 1 to 10 being control and 11 to 20 being experiment. Whereas, the rows of the dataset contains genes. First 5 out of 10 genes, gene1-gene5 are the true DEGs as the expression values for the first 10 samples are ~13 times higher than the rest.
 }
 \usage{
 gene_exp_data
 }
 \description{
-This dataset contains simulated gene expression data for analysis.
+This dataset contains statistically simulated gene expression data for ease of exercise.
 }
 \examples{
 # Data will be loaded with lazy loading and can be accessible when needed.

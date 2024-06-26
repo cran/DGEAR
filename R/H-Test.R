@@ -11,6 +11,8 @@
 #'
 #' @importFrom stats sd
 #' @importFrom stats pt
+#' @importFrom stats p.adjust
+#' @importFrom stats na.omit
 #' @examples
 #' library(DGEAR)
 #' data("gene_exp_data")
@@ -24,6 +26,14 @@ perform_h_test <- function(con, exp, alpha= 0.05, FC){
   for (i in 1:nrow(half_t_stat)) {
     half_t_stat$p.value = 2*pt(abs(half_t_stat$statistic), df=nrow(con)-1, lower.tail = F)
   }
-  half_t_stat$fdr[half_t_stat$p.value<=(alpha/nrow(half_t_stat))*seq(length=nrow(half_t_stat))] <- 1
-  return(half_t_stat)
+  #half_t_stat$fdr[half_t_stat$p.value<=(alpha/nrow(half_t_stat))*seq(length=nrow(half_t_stat))] <- 1
+  half_t_stat$BH = p.adjust(half_t_stat$p.value, method = "BH")
+  half_t_stat$fdr[half_t_stat$BH<=alpha]<- 1
+  
+  DEGs=half_t_stat$ID[half_t_stat$fdr == 1]
+  DEGs= na.omit(DEGs)
+  DEGs = as.data.frame(DEGs)
+  colnames(DEGs) = "DEGs"
+  print(DEGs)
+  return(list(Table = half_t_stat, DEGs = DEGs))
 }

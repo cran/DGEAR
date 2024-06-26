@@ -8,7 +8,8 @@
 #' @return A data frame containing values for statistic score, p-values etc for each gene being tested.
 #' @export
 #' @importFrom DescTools DunnettTest
-#'
+#' @importFrom stats p.adjust
+#' @importFrom stats na.omit
 #' @examples
 #' library(DGEAR)
 #' data("gene_exp_data")
@@ -28,6 +29,14 @@ perform_dunnett_test <- function(datafile, con, exp, alpha =0.05) {
 
   }
   d_stat = cbind.data.frame(ID=row.names(con),p.value)
-  d_stat$fdr[d_stat$p.value<=(alpha/nrow(d_stat))*seq(length=nrow(d_stat))] <- 1
-  return(d_stat)
+  #d_stat$fdr[d_stat$p.value<=(alpha/nrow(d_stat))*seq(length=nrow(d_stat))] <- 1
+  d_stat$BH = p.adjust(d_stat$p.value, method = "BH")
+  d_stat$fdr[d_stat$BH<=alpha]<- 1
+  
+  DEGs=d_stat$ID[d_stat$fdr == 1]
+  DEGs= na.omit(DEGs)
+  DEGs = as.data.frame(DEGs)
+  colnames(DEGs) = "DEGs"
+  print(DEGs)
+  return(list(Table = d_stat, DEGs = DEGs))
 }
